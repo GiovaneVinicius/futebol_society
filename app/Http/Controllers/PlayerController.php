@@ -15,6 +15,11 @@ class PlayerController extends Controller
         $this->playerService = $playerService;
     }
 
+    public function index()
+    {
+        return response()->json($this->playerService->getAll());
+    }
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [

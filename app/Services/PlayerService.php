@@ -13,6 +13,11 @@ class PlayerService
         $this->playerRepository = $playerRepository;
     }
 
+    public function getAll()
+    {
+        return $this->playerRepository->getAll();
+    }
+
     public function create(array $data)
     {
         return $this->playerRepository->create($data);

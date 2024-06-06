@@ -29,4 +29,9 @@ class PlayerRepository implements PlayerRepositoryInterface
         $player->delete();
         return $player;
     }
+
+    public function getAll()
+    {
+        return Player::all();
+    }
 }

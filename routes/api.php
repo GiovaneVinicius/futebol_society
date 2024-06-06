@@ -4,7 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PlayerController;
-use App\Http\Controllers\MatchController;
+use App\Http\Controllers\FootballMatchController;
+use App\Http\Controllers\MatchPlayerController;
 use App\Http\Middleware\CheckSanctumToken;
 
 // Rotas para registro, login e logout de usuários
@@ -15,5 +16,6 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanc
 Route::middleware(CheckSanctumToken::class)->group(function () {
     // JOGADORES
     Route::resource('players', PlayerController::class);
-    Route::resource('matches', MatchController::class);
+    Route::resource('matches', FootballMatchController::class);
+    Route::resource('matchPlayers', MatchPlayerController::class);
 });
