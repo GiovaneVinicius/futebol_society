@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\AuthService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
@@ -16,31 +17,57 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|between:2,100',
+            'email' => 'required|string|email|max:100|unique:users',
+            'password' => 'required|string|min:6',
         ]);
 
-        $user = $this->authService->register($data);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
 
-        return response()->json(['user' => $user]);
+        $user = $this->authService->register($request->all());
+
+        $accessToken = $this->authService->generateToken($user);
+
+        return response()->json([
+            'access_token' => $accessToken,
+            'token_type' => 'Bearer',
+            'type_user' => 'user',
+            'user' => $user,
+        ], 201);
     }
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|string|email|max:100',
+            'password' => 'required|string|min:6',
         ]);
 
-        $token = $this->authService->login($credentials);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
 
-        return response()->json($token);
+        $user = $this->authService->login($request->all());
+
+        if(!$user){
+            return response()->json(['email' => ['As credenciais fornecidas estão incorretas.']], 400);
+        }
+
+        $accessToken = $this->authService->generateToken($user);
+
+        return response()->json([
+            'access_token' => $accessToken,
+            'token_type' => 'Bearer',
+            'type_user' => 'user',
+            'user' => $user,
+        ]);
     }
 
-    public function logout()
-    {
-        return $this->authService->logout();
-    }
+    // public function logout()
+    // {
+    //     return $this->authService->logout();
+    // }
 }

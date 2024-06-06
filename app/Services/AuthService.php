@@ -4,6 +4,9 @@ namespace App\Services;
 
 use App\Repositories\UserRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Validator;
+use App\Models\User;
 
 class AuthService
 {
@@ -14,26 +17,36 @@ class AuthService
         $this->userRepository = $userRepository;
     }
 
-    public function register(array $data)
+    public function register($data)
     {
         $data['password'] = bcrypt($data['password']);
-        return $this->userRepository->create($data);
+
+        // Criar o usuário
+        $user = $this->userRepository->create($data);
+        
+        return $user;
+    }
+
+    public function generateToken(User $user){
+        return $user->createToken('auth_token')->plainTextToken;
     }
 
     public function login(array $credentials)
     {
+        // Tentar autenticar o usuário
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
-            $token = $user->createToken('auth-token')->plainTextToken;
-            return ['token' => $token];
+            return $user;
         } else {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return false;
         }
     }
 
-    public function logout()
-    {
-        Auth::user()->tokens()->delete();
-        return response()->json(['message' => 'Logged out successfully']);
-    }
+    // public function logout()
+    // {
+    //     // Revogar todos os tokens de acesso do usuário autenticado
+    //     Auth::user()->tokens()->delete();
+
+    //     return response()->json(['message' => 'Usuário deslogado com sucesso.']);
+    // }
 }
